@@ -23,7 +23,7 @@ month_diffs = [1,2]
 load_dotenv()
 
 # read .env file
-api_keys = {'api_key' : os.getenv('MAILCHIMP_API_KEY')}
+api_keys = {'api_key' : os.getenv('MAILCHIMP_API_KEY') + '1'}
 
 # init directories
 data_dir = 'data'
@@ -149,7 +149,7 @@ for month_diff in month_diffs:
         except ApiClientError as e: # for future specific error handling
             log_times.append(dt.datetime.now())
             log_items.append(log_items_dict['error'])
-            log_descriptions.append(e)
+            log_descriptions.append(e.__str__() or 'No error message')
             print(f'Error {e}')
             print(f'Trying again, waiting {wait_time}s, total time waited {waited_time}s.')
             waited_time+=wait_time
@@ -161,7 +161,7 @@ for month_diff in month_diffs:
         except Exception as e:
             log_times.append(dt.datetime.now())
             log_items.append(log_items_dict['error'])
-            log_descriptions.append(e)
+            log_descriptions.append(e.__str__() or 'No error message')
             print(f'Error {e}')
             print(f'Trying again, waiting {wait_time}s, total time waited {waited_time}s.')
             waited_time+=wait_time
