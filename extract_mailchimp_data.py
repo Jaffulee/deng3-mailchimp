@@ -7,6 +7,7 @@ import mailchimp_marketing as MailchimpMarketing
 from mailchimp_marketing.api_client import ApiClientError
 from dotenv import load_dotenv
 import pandas as pd
+import modules.load_data_to_s3 as ls3
 
 # API Reference: https://mailchimp.com/developer/marketing/api/root/
 # Python Library: https://github.com/mailchimp/mailchimp-marketing-python
@@ -23,7 +24,7 @@ month_diffs = [1,2]
 load_dotenv()
 
 # read .env file
-api_keys = {'api_key' : os.getenv('MAILCHIMP_API_KEY') + '1'}
+api_keys = {'api_key' : os.getenv('MAILCHIMP_API_KEY')}
 
 # init directories
 data_dir = 'data'
@@ -196,3 +197,22 @@ combined_log_df = pd.concat([existing_log_df, log_df], ignore_index=True)
 combined_log_df.to_csv(log_path,index=False)
 
 print(f"Appended new logs to {log_path}")
+
+
+# Load block
+
+api_keys = {'Access_key_ID' : os.getenv('Access_key_ID'),
+'Secret_access_key' : os.getenv('Secret_access_key'),
+'AWS_BUCKET_NAME' : os.getenv('AWS_BUCKET_NAME')}
+# print(api_keys)
+remove_local = False
+filepath_bases_json = ['data/campaign','data/email']
+s3filepath_bases_json = ['python-import/campaign','python-import/email']
+filepath_base_log = 'data'
+s3filepath_base_log  = 'python-import/log'
+
+for i, filepath_base in enumerate(filepath_bases_json):
+    s3filepath_base = s3filepath_bases_json[i]
+    ls3.load_files_to_s3(filepath_base,s3filepath_base,api_keys,'.json',remove_local)
+
+ls3.load_logs_csv(filepath_base_log,s3filepath_base_log,api_keys,remove_local)
