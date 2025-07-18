@@ -16,7 +16,11 @@ This Python script extracts **campaign** and **email activity data** from the **
 
 ---
 
+```
 ## 📁 Project Structure
+
+
+```
 
 project/
 │
@@ -31,6 +35,8 @@ project/
 ├── .env # Environment variables (excluded from version control)
 ├── main_script.py # Main extraction and upload logic
 └── README.md
+
+```
 
 ---
 
@@ -81,6 +87,8 @@ overwrite_if_already_exists = True — whether to overwrite local files
 remove_local = False — whether to remove local files after upload
 
 wait_time and total_wait_time — retry configuration on API failure
+
+```
 
 ```
 
