@@ -80,6 +80,12 @@ You can easily configure:
 
 month_diffs = [1, 2] — number of months back to extract
 
+
+End example of schema
+
+<img width="1514" height="911" alt="image" src="https://github.com/user-attachments/assets/62838eb1-2130-4091-8cbc-8c02806d0a85" />
+
+
 overwrite_if_already_exists = True — whether to overwrite local files
 
 remove_local = False — whether to remove local files after upload
