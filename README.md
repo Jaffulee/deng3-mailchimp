@@ -56,6 +56,29 @@ In dbt, the raw Mailchimp JSON data is:
 
 <hr>
 
+<h2>Example Downstream Schema</h2>
+
+<p>
+The diagram below illustrates an <strong>example downstream schema</strong> derived from the raw Mailchimp extracts.
+It shows how campaign-level and email-level data can be structured and related once ingested into a warehouse
+and transformed downstream.
+</p>
+
+<p>
+This schema is indicative rather than prescriptive, and is included to demonstrate how the raw API data
+supports analytics use cases after modelling.
+</p>
+
+<p>
+<img
+  src="https://github.com/user-attachments/assets/62838eb1-2130-4091-8cbc-8c02806d0a85"
+  alt="Example Mailchimp downstream schema"
+  width="100%"
+/>
+</p>
+
+<hr>
+
 <h2>Features</h2>
 
 <ul>
