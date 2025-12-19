@@ -1,93 +1,156 @@
-# 📬 Mailchimp Extractor & S3 Uploader
+<!-- README.html -->
 
-This Python script extracts **campaign** and **email activity data** from the **Mailchimp Marketing API**, stores them as JSON files locally, and uploads the data to an **AWS S3 bucket**. It also maintains a **detailed log** of actions and errors, saved locally and uploaded to S3.
+<p><a href="https://jaffulee.github.io/Jaffulee/">Visit my website</a></p>
 
----
+<h1>deng3-mailchimp</h1>
 
-## 🚀 Features
+<p><strong>Mailchimp API Extraction Pipeline</strong><br>
+Extracting campaign and email engagement data from the Mailchimp Marketing API for downstream analytics.</p>
 
-- Extracts Mailchimp campaign metadata for the previous months
-- Extracts email activity for each campaign
-- Saves campaign and email data as `.json` files
-- Logs API activity, errors, retries, and file actions in a CSV log
-- Uploads all `.json` and log files to Amazon S3
-- Supports retry and timeout logic for resilient API extraction
-- Uses `.env` file to securely store API and AWS credentials
+<ul>
+  <li>GitHub: <a href="https://github.com/Jaffulee">https://github.com/Jaffulee</a></li>
+  <li>LinkedIn: <a href="https://www.linkedin.com/in/jeffrey-brian-thompson/">https://www.linkedin.com/in/jeffrey-brian-thompson/</a></li>
+  <li>Writing: <a href="https://www.thedataschool.co.uk/blog/jeffrey-brian-thompson/">https://www.thedataschool.co.uk/blog/jeffrey-brian-thompson/</a></li>
+</ul>
 
----
+<hr>
 
-## 📁 Project Structure
+<h2>About</h2>
 
-```
+<p>
+This project extracts <strong>campaign metadata</strong> and <strong>email-level engagement activity</strong> from the
+<strong>Mailchimp Marketing API</strong>, writes the results as JSON files, and uploads them to <strong>AWS S3</strong>.
+</p>
 
-project/
-│
-├── data/ # Local folder for extracted JSON data and logs
-│ ├── campaign/ # Campaign-level data
-│ ├── email/ # Email-level data
-│ └── mailchimp_extract_logs.csv
-│
+<p>
+It forms the <strong>Bronze (raw ingestion) layer</strong> of a wider analytics pipeline, with transformations and modelling
+handled downstream in dbt Cloud.
+</p>
+
+<hr>
+
+<h2>Downstream Usage</h2>
+
+<p>
+The data produced by this project is modelled and transformed in the following dbt Cloud project:
+</p>
+
+<ul>
+  <li>
+    <strong>dbt analytics layer:</strong>
+    <a href="https://github.com/Jaffulee/dbt-cloud-deng3">
+      https://github.com/Jaffulee/dbt-cloud-deng3
+    </a>
+  </li>
+</ul>
+
+<p>
+In dbt, the raw Mailchimp JSON data is:
+</p>
+
+<ul>
+  <li>Parsed and standardised in <strong>staging (Bronze)</strong> models</li>
+  <li>Flattened and enriched in <strong>intermediate (Silver)</strong> models</li>
+  <li>Exposed as analytics-ready <strong>mart (Gold)</strong> models for reporting</li>
+</ul>
+
+<hr>
+
+<h2>Features</h2>
+
+<ul>
+  <li>Extracts Mailchimp campaign metadata for configurable previous months</li>
+  <li>Extracts email activity for each campaign</li>
+  <li>Saves campaign and email data as JSON files</li>
+  <li>Uploads extracted data and logs to Amazon S3</li>
+  <li>CSV-based logging of API calls, retries, errors, and file actions</li>
+  <li>Retry and timeout logic for resilient API extraction</li>
+  <li>Secrets managed via <code>.env</code> file</li>
+</ul>
+
+<hr>
+
+<h2>Project Structure</h2>
+
+<pre>
+├── extract_mailchimp_data.py      # Main extraction and upload logic
 ├── modules/
-│ └── load_data_to_s3.py # Upload functions for S3
-│
-├── .env # Environment variables (excluded from version control)
-├── main_script.py # Main extraction and upload logic
+│   └── load_data_to_s3.py         # Shared S3 upload utilities
+├── requirements.txt               # Python dependencies
+├── schema_example.sql              # Example downstream schema
+├── snowpipe_example.sql            # Example Snowflake ingestion pattern
 └── README.md
+</pre>
 
-```
+<hr>
 
----
+<h2>How It Works</h2>
 
-🔐 .env File Example
-Create a .env file in the root directory:
+<h3>Step 1: Extract Campaign & Email Data</h3>
 
+<p>
+For each of the last <code>N</code> months (configurable), the script:
+</p>
+
+<ul>
+  <li>Fetches campaign metadata using <code>client.campaigns.list(...)</code></li>
+  <li>Extracts campaign IDs</li>
+  <li>Fetches email activity for each campaign using
+      <code>client.reports.get_email_activity_for_campaign(...)</code></li>
+  <li>Writes the results as JSON files</li>
+</ul>
+
+<h3>Step 2: Logging</h3>
+
+<p>
+All actions are logged to a CSV file with timestamps and descriptions, including:
+</p>
+
+<ul>
+  <li>File creation and overwrites</li>
+  <li>S3 uploads</li>
+  <li>Retries, waits, and API errors</li>
+</ul>
+
+<h3>Step 3: Upload to S3</h3>
+
+<p>
+All JSON files and logs are uploaded to an S3 bucket using <code>boto3</code>.
+Local file retention can be configured.
+</p>
+
+<hr>
+
+<h2>Configuration</h2>
+
+<p>
+Secrets are stored in a <code>.env</code> file (excluded from version control):
+</p>
+
+<pre>
 MAILCHIMP_API_KEY=your-mailchimp-api-key
 Access_key_ID=your-aws-access-key-id
 Secret_access_key=your-aws-secret-access-key
 AWS_BUCKET_NAME=your-s3-bucket-name
-🧪 How It Works
-✅ Step 1: Extract Campaign and Email Data
-For each of the last N months (customizable), the script:
+</pre>
 
-Gets campaign data using client.campaigns.list(...)
+<p>
+Key configurable parameters include:
+</p>
 
-Extracts campaign IDs
+<ul>
+  <li><code>month_diffs</code> — number of months back to extract</li>
+  <li><code>overwrite_if_already_exists</code> — overwrite local files</li>
+  <li><code>remove_local</code> — delete local files after upload</li>
+  <li><code>wait_time</code> / <code>total_wait_time</code> — retry behaviour</li>
+</ul>
 
-For each campaign ID, fetches email activity using client.reports.get_email_activity_for_campaign(...)
+<hr>
 
-Saves the results as JSON files to data/campaign/ and data/email/
+<h2>Notes</h2>
 
-✅ Step 2: Logging
-Logs are recorded with timestamps and actions (create, overwrite, error, wait)
-
-Appended to mailchimp_extract_logs.csv
-
-✅ Step 3: Upload to S3
-All .json and log files are uploaded to your S3 bucket using the boto3 client
-
-You can configure whether to delete local files after upload with remove_local = True
-
-📝 Logging Example
-Each row in mailchimp_extract_logs.csv contains:
-
-log_time log_item log_description
-2025-07-10 12:00:00 data/campaign/file1.json File created
-2025-07-10 12:00:10 python-import/campaign/file1 File copied to S3
-2025-07-10 12:00:15 Error TimeoutError: ...
-
-🛠️ Customization
-You can easily configure:
-
-month_diffs = [1, 2] — number of months back to extract
-
-
-End example of schema
-
-<img width="1514" height="911" alt="image" src="https://github.com/user-attachments/assets/62838eb1-2130-4091-8cbc-8c02806d0a85" />
-
-
-overwrite_if_already_exists = True — whether to overwrite local files
-
-remove_local = False — whether to remove local files after upload
-
-wait_time and total_wait_time — retry configuration on API failure
+<ul>
+  <li>This project focuses on <strong>extraction and loading only</strong>.</li>
+  <li>No transformations or business logic are applied here.</li>
+  <li>All modelling and analytics logic lives in the downstream dbt project.</li>
+</ul>
